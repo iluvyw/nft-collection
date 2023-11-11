@@ -1,0 +1,45 @@
+type Collection {
+  id: ID!
+  name: String!
+  authorId: ID!
+  author: User!
+  nftIds: [ID!]!
+  nfts: [NFT!]!
+}
+
+type NFT {
+  id: ID!
+  address: String!
+  tokenId: String!
+  tokenURI: String!
+}
+
+type User {
+  id: ID!
+  name: String!
+}
+
+type Query {
+  collections: [Collection!]!
+  nfts: [NFT!]!
+}
+
+input NewNFT {
+  address: String!
+  tokenId: String!
+}
+
+input NewCollectionNFT {
+  id: String!
+}
+
+input NewCollection {
+  name: String!
+  authorId: String!
+  nfts: [ID!]!
+}
+
+type Mutation {
+  createCollection(input: NewCollection!): Collection!
+  createNFT(input: NewNFT!): NFT!
+}
