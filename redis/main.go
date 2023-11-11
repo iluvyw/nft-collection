@@ -29,21 +29,18 @@ func (db *DB) CreateNft(newNft model.NewNft) *model.Nft{
     ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
     id := strconv.FormatInt(db.client.DBSize(ctx).Val() + 1, 10)
+
     address := newNft.Address
     tokenId := newNft.TokenID
     tokenURI := "https://token.uri.com"
-    // nft := map[string]interface{}{
-    //     "ID": id,
-    //     "Address": address,
-    //     "TokenID": tokenId,
-    //     "TokenURI": tokenURI,
-    // }
+
     nft := &model.Nft{
         ID: id,
         Address: address,
         TokenID: tokenId,
         TokenURI: tokenURI,
     }
+
     db.client.HSet(
         ctx,
         fmt.Sprintf("nft:%s",id),
@@ -52,5 +49,6 @@ func (db *DB) CreateNft(newNft model.NewNft) *model.Nft{
         "tokenId", nft.TokenID,
         "tokenUri", nft.TokenURI,
     )
+    
     return nft
 }
