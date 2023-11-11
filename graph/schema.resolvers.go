@@ -7,19 +7,15 @@ package graph
 import (
 	"context"
 	"fmt"
-	"strconv"
 
 	"github.com/0xanpham/nft-collection/graph/model"
+	"github.com/0xanpham/nft-collection/redis"
 )
+
+var db = redis.Connect()
 
 // Author is the resolver for the author field.
 func (r *collectionResolver) Author(ctx context.Context, obj *model.Collection) (*model.User, error) {
-	authorId := obj.AuthorID
-	for _, user := range r.users {
-		if authorId == user.ID {
-			return user, nil
-		}
-	}
 	return nil, nil
 }
 
@@ -35,16 +31,7 @@ func (r *mutationResolver) CreateCollection(ctx context.Context, input model.New
 
 // CreateNft is the resolver for the createNFT field.
 func (r *mutationResolver) CreateNft(ctx context.Context, input model.NewNft) (*model.Nft, error) {
-	tokenURI := fmt.Sprintf("%s-%s", input.Address, input.TokenID)
-	id := strconv.Itoa(len(r.nfts) + 1)
-	var newNFT model.Nft = model.Nft{
-		ID:       id,
-		TokenID:  input.TokenID,
-		Address:  input.Address,
-		TokenURI: tokenURI,
-	}
-	r.nfts = append(r.nfts, &newNFT)
-	return &newNFT, nil
+	return db.CreateNft(input), nil
 }
 
 // Collections is the resolver for the collections field.
@@ -54,7 +41,7 @@ func (r *queryResolver) Collections(ctx context.Context) ([]*model.Collection, e
 
 // Nfts is the resolver for the nfts field.
 func (r *queryResolver) Nfts(ctx context.Context) ([]*model.Nft, error) {
-	return r.nfts, nil
+	return nil, nil
 }
 
 // Collection returns CollectionResolver implementation.
