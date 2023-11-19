@@ -20,9 +20,9 @@ func Connect() *DB {
         Password: "", // no password set
         DB:		  0,  // use default DB
     })
-		return &DB{
-			client: client,
-		}
+    return &DB{
+        client: client,
+    }
 }
 
 func (db *DB) CreateNft(newNft model.NewNft) *model.Nft{
@@ -51,4 +51,32 @@ func (db *DB) CreateNft(newNft model.NewNft) *model.Nft{
     )
     
     return nft
+}
+
+func (db *DB) CreateCollection(newCollection model.NewCollection) *model.Collection{
+    ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+    id := strconv.FormatInt(db.client.DBSize(ctx).Val() + 1, 10)
+
+    name := newCollection.Name
+    authorId := newCollection.AuthorID
+    nfts := newCollection.Nfts
+
+    collection := &model.Collection{
+        ID: id,
+        Name: name,
+        AuthorID: authorId,
+        NftIds: nfts,
+    }
+
+    db.client.HSet(
+        ctx,
+        fmt.Sprintf("collection:%s",id),
+        "id", collection.ID,
+        "name", collection.Name,
+        "authorId", collection.AuthorID,
+        "nfts", collection.NftIds,
+    )
+    
+    return collection
 }

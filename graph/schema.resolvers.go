@@ -26,7 +26,7 @@ func (r *collectionResolver) Nfts(ctx context.Context, obj *model.Collection) ([
 
 // CreateCollection is the resolver for the createCollection field.
 func (r *mutationResolver) CreateCollection(ctx context.Context, input model.NewCollection) (*model.Collection, error) {
-	panic(fmt.Errorf("not implemented: CreateCollection - createCollection"))
+	return db.CreateCollection(input), nil
 }
 
 // CreateNft is the resolver for the createNFT field.
