@@ -2,6 +2,7 @@ package redis
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"strconv"
 	"time"
@@ -69,13 +70,18 @@ func (db *DB) CreateCollection(newCollection model.NewCollection) *model.Collect
         NftIds: nfts,
     }
 
+    nftIds, error := json.Marshal(collection.NftIds)
+    if error != nil {
+        panic(error)
+    }
+
     db.client.HSet(
         ctx,
         fmt.Sprintf("collection:%s",id),
         "id", collection.ID,
         "name", collection.Name,
         "authorId", collection.AuthorID,
-        "nfts", collection.NftIds,
+        "nfts", nftIds,
     )
     
     return collection
