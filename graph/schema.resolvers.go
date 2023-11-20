@@ -9,10 +9,12 @@ import (
 	"fmt"
 
 	"github.com/0xanpham/nft-collection/graph/model"
-	"github.com/0xanpham/nft-collection/redis"
+	"github.com/0xanpham/nft-collection/services/collection"
+	"github.com/0xanpham/nft-collection/services/nft"
 )
 
-var db = redis.Connect()
+var nftService = nft.Init()
+var collectionService = collection.Init()
 
 // Author is the resolver for the author field.
 func (r *collectionResolver) Author(ctx context.Context, obj *model.Collection) (*model.User, error) {
@@ -26,12 +28,12 @@ func (r *collectionResolver) Nfts(ctx context.Context, obj *model.Collection) ([
 
 // CreateCollection is the resolver for the createCollection field.
 func (r *mutationResolver) CreateCollection(ctx context.Context, input model.NewCollection) (*model.Collection, error) {
-	return db.CreateCollection(input), nil
+	return collectionService.Create(input), nil
 }
 
 // CreateNft is the resolver for the createNFT field.
 func (r *mutationResolver) CreateNft(ctx context.Context, input model.NewNft) (*model.Nft, error) {
-	return db.CreateNft(input), nil
+	return nftService.Create(input), nil
 }
 
 // Collections is the resolver for the collections field.

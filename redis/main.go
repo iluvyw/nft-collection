@@ -2,12 +2,8 @@ package redis
 
 import (
 	"context"
-	"encoding/json"
-	"fmt"
-	"strconv"
 	"time"
 
-	"github.com/0xanpham/nft-collection/graph/model"
 	"github.com/redis/go-redis/v9"
 )
 
@@ -15,74 +11,31 @@ type DB struct {
 	client *redis.Client
 }
 
-func Connect() *DB {
+func Connect(index int) *DB {
     client := redis.NewClient(&redis.Options{
         Addr:	  "localhost:6379",
         Password: "", // no password set
-        DB:		  0,  // use default DB
+        DB:		  index,  // use default DB
     })
     return &DB{
         client: client,
     }
 }
 
-func (db *DB) CreateNft(newNft model.NewNft) *model.Nft{
+func (db *DB) Size(index int) int {
     ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-	defer cancel()
-    id := strconv.FormatInt(db.client.DBSize(ctx).Val() + 1, 10)
-
-    address := newNft.Address
-    tokenId := newNft.TokenID
-    tokenURI := "https://token.uri.com"
-
-    nft := &model.Nft{
-        ID: id,
-        Address: address,
-        TokenID: tokenId,
-        TokenURI: tokenURI,
-    }
-
-    db.client.HSet(
-        ctx,
-        fmt.Sprintf("nft:%s",id),
-        "id", nft.ID,
-        "address", nft.Address,
-        "tokenId", nft.TokenID,
-        "tokenUri", nft.TokenURI,
-    )
-    
-    return nft
+    defer cancel()
+    return int(db.client.DBSize(ctx).Val())
 }
 
-func (db *DB) CreateCollection(newCollection model.NewCollection) *model.Collection{
+func (db *DB) Set(key string, value string) {
     ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-	defer cancel()
-    id := strconv.FormatInt(db.client.DBSize(ctx).Val() + 1, 10)
+    defer cancel()
+    db.client.Set(ctx, key, value, 0)
+}
 
-    name := newCollection.Name
-    authorId := newCollection.AuthorID
-    nfts := newCollection.Nfts
-
-    collection := &model.Collection{
-        ID: id,
-        Name: name,
-        AuthorID: authorId,
-        NftIds: nfts,
-    }
-
-    nftIds, error := json.Marshal(collection.NftIds)
-    if error != nil {
-        panic(error)
-    }
-
-    db.client.HSet(
-        ctx,
-        fmt.Sprintf("collection:%s",id),
-        "id", collection.ID,
-        "name", collection.Name,
-        "authorId", collection.AuthorID,
-        "nfts", nftIds,
-    )
-    
-    return collection
+func (db *DB) Get(key string) string {
+    ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+    defer cancel()
+    return db.client.Get(ctx, key).String()
 }
